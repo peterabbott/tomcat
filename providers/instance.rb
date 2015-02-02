@@ -1,5 +1,5 @@
 action :configure do
-  base_instance = node['tomcat']['base_instance']
+  base_instance = "tomcat#{node['tomcat']['base_version']}"
 
   # Set defaults for resource attributes from node attributes. We can't do
   # this in the resource declaration because node isn't populated yet when
@@ -33,7 +33,7 @@ action :configure do
     [:base, :home, :config_dir, :log_dir, :work_dir, :context_dir,
      :webapp_dir].each do |attr|
       if not new_resource.instance_variable_get("@#{attr}") and node["tomcat"][attr]
-        new = node["tomcat"][attr].sub(base_instance, instance)
+        new = node["tomcat"][attr].sub("tomcat#{node['tomcat']['base_version']}", "#{instance}")
         new_resource.instance_variable_set("@#{attr}", new)
       end
     end
@@ -83,25 +83,11 @@ action :configure do
     end
 
     # Make a copy of the init script for this instance
-    if node['init_package'] == 'systemd' and not platform_family?('debian')
-      template "/usr/lib/systemd/system/#{instance}.service" do
-        source 'tomcat.service.erb'
-        variables ({
-          :instance => instance,
-          :user => new_resource.user,
-          :group => new_resource.group
-        })
-        owner 'root'
-        group 'root'
-        mode '0644'
-      end
-    else
-      execute "/etc/init.d/#{instance}" do
-        command <<-EOH
-          cp /etc/init.d/#{base_instance} /etc/init.d/#{instance}
-          perl -i -pe 's/#{base_instance}/#{instance}/g' /etc/init.d/#{instance}
-        EOH
-      end
+    execute "/etc/init.d/#{instance}" do
+      command <<-EOH
+        cp /etc/init.d/#{base_instance} /etc/init.d/#{instance}
+        perl -i -pe 's/#{base_instance}/#{instance}/g' /etc/init.d/#{instance}
+      EOH
     end
   end
 
@@ -118,12 +104,11 @@ action :configure do
     new_resource.java_options = java_options
   end
 
-  case node['platform_family']
-  when 'rhel', 'fedora'
+  case node['platform']
+  when 'centos', 'redhat', 'fedora', 'amazon', 'oracle'
     template "/etc/sysconfig/#{instance}" do
       source 'sysconfig_tomcat6.erb'
       variables ({
-        :instance => instance,
         :user => new_resource.user,
         :home => new_resource.home,
         :base => new_resource.base,
@@ -137,12 +122,6 @@ action :configure do
       group 'root'
       mode '0644'
       notifies :restart, "service[#{instance}]"
-    end
-    file "/var/run/#{instance}.pid" do
-      owner new_resource.user
-      group new_resource.group
-      mode '0644'
-      action :create_if_missing
     end
   when 'smartos'
     # SmartOS doesn't support multiple instances
@@ -264,11 +243,11 @@ action :configure do
   end
 
   service "#{instance}" do
-    case node['platform_family']
-    when 'rhel', 'fedora'
+    case node['platform']
+    when 'centos', 'redhat', 'fedora', 'amazon'
       service_name "#{instance}"
       supports :restart => true, :status => true
-    when 'debian'
+    when 'debian', 'ubuntu'
       service_name "#{instance}"
       supports :restart => true, :reload => false, :status => true
     when 'smartos'
