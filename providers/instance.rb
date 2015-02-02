@@ -215,7 +215,7 @@ action :configure do
          -password pass:#{node['tomcat']['keystore_password']} \
          -out #{new_resource.keystore_file}
       EOH
-      notifies :restart, "service[#{instance}]"
+      notifies :restart, "service[tomcat]"
     end
 
     cookbook_file "#{new_resource.config_dir}/#{new_resource.ssl_cert_file}" do
