@@ -25,6 +25,9 @@ tomcat_pkgs = value_for_platform(
   ['smartos'] => {
     'default' => ['apache-tomcat'],
   },
+  ['centos' => { 
+    'default' => ["#{node['tomcat']['yum_package']}"]
+  },
   'default' => ["tomcat#{node['tomcat']['base_version']}"]
   )
 if node['tomcat']['deploy_manager_apps']
