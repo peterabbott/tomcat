@@ -51,9 +51,9 @@ default['tomcat']['run_base_instance'] = true
 case node['platform']
 
 when 'centos', 'redhat', 'fedora', 'amazon', 'scientific', 'oracle'
-  if node['tomcat']['base_version'] == '6'
+  if node['tomcat']['base_version'].to_f == 6
     default['tomcat']['yum_package'] = 'tomcat6'
-  elsif node['tomcat']['base_version'] == '7'
+  elsif node['tomcat']['base_version'].to_f == 7
     default['tomcat']['yum_package'] = 'tomcat'
   else
     fail "Version 8 Not supported with yum"
