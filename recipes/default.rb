@@ -20,6 +20,13 @@
 # required for the secure_password method from the openssl cookbook
 ::Chef::Recipe.send(:include, Opscode::OpenSSL::Password)
 
+include_recipe "java" unless node['tomcat']['skip_java']
+
+case node['platform_family'] 
+  when 'centos', 'rhel'
+    include_recipe 'yum-epel' if node['tomcat']['base_version'].to_f > 6
+end 
+
 
 tomcat_pkgs = value_for_platform(
   ['smartos'] => {

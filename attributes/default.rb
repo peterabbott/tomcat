@@ -16,6 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+# skip java install, assumed installed elsewhere 
+default['tomcat']['skip_java'] = false
+ 
 default['tomcat']['base_version'] = 6
 default['tomcat']['port'] = 8080
 default['tomcat']['proxy_port'] = nil

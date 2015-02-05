@@ -1,5 +1,6 @@
 action :configure do
-  base_instance = "tomcat#{node['tomcat']['base_version']}"
+  base_instance = baseInstanceForPlatform();
+  #"tomcat#{node['tomcat']['base_version']}"
 
   # Set defaults for resource attributes from node attributes. We can't do
   # this in the resource declaration because node isn't populated yet when
@@ -267,4 +268,8 @@ action :configure do
     command 'sleep 5'
     action :nothing
   end
+end
+
+def baseInstanceForPlatform()
+  return "tomcat#{node['tomcat']['base_version']}"
 end
