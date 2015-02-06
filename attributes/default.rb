@@ -17,7 +17,7 @@
 # limitations under the License.
 
 # skip java install, assumed installed elsewhere 
-default['tomcat']['skip_java'] = false
+default['tomcat']['skip_java'] = java 
  
 default['tomcat']['base_version'] = 6
 default['tomcat']['port'] = 8080
