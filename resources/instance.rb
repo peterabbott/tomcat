@@ -7,6 +7,9 @@ attribute :name,
   :kind_of => String,
   :required => true,
   :name_attribute => true
+attribute :base_version,
+  :kind_of => [ TrueClass, FalseClass ],
+  :default => false
 attribute :port,
   :kind_of => Fixnum
 attribute :proxy_port,

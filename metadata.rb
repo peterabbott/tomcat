@@ -9,6 +9,8 @@ version          '0.17.0'
 depends 'java'
 depends 'openssl'
 
+suggests 'yum-epel'
+
 supports 'debian'
 supports 'ubuntu'
 supports 'centos'

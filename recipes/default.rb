@@ -22,28 +22,40 @@
 
 include_recipe "java" unless node['tomcat']['skip_java']
 
+
 case node['platform_family'] 
   when 'centos', 'rhel'
-    include_recipe 'yum-epel' if node['tomcat']['base_version'].to_f > 6
+    if node['tomcat']['base_version'].to_f > 6
+      log "If you have not included yum-epel, this may fail."
+      base_tomcat_package = 'tomcat'
+    else
+      base_tomcat_package = "tomcat#{node['tomcat']['base_version']}"
+    end
+
+  when 'smartos'
+    base_tomcat_package = 'apache-tomcat'
+  else
+    base_tomcat_package = "tomcat#{node['tomcat']['base_version']}"
 end 
 
+tomcat_pkgs = [base_tomcat_package]
+# tomcat_pkgs = value_for_platform(
+#   ['smartos'] => {
+#     'default' => ['apache-tomcat'],
+#   },
+#   ['centos'] => { 
+#     'default' => ["#{node['tomcat']['yum_package']}"]
+#   },
+#   'default' => ["tomcat#{node['tomcat']['base_version']}"]
+#   )
 
-tomcat_pkgs = value_for_platform(
-  ['smartos'] => {
-    'default' => ['apache-tomcat'],
-  },
-  ['centos'] => { 
-    'default' => ["#{node['tomcat']['yum_package']}"]
-  },
-  'default' => ["tomcat#{node['tomcat']['base_version']}"]
-  )
 if node['tomcat']['deploy_manager_apps']
   tomcat_pkgs << value_for_platform(
     %w{ debian  ubuntu } => {
       'default' => "tomcat#{node['tomcat']['base_version']}-admin",
     },    
     %w{ centos redhat fedora amazon scientific oracle } => {
-      'default' => "tomcat#{node['tomcat']['base_version']}-admin-webapps",
+      'default' => "#{base_tomcat_package}-admin-webapps",
     }
     )
 end
@@ -78,7 +90,8 @@ node.set_unless['tomcat']['keystore_password'] = secure_password
 node.set_unless['tomcat']['truststore_password'] = secure_password
 
 if node['tomcat']['run_base_instance']
-  tomcat_instance "base" do
+  tomcat_instance base_tomcat_package do
+    base_version true
     port node['tomcat']['port']
     proxy_port node['tomcat']['proxy_port']
     ssl_port node['tomcat']['ssl_port']

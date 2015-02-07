@@ -1,6 +1,6 @@
 action :configure do
-  base_instance = baseInstanceForPlatform();
-  #"tomcat#{node['tomcat']['base_version']}"
+  #base_instance = new_resource.instance_variable_get("@service_name") || "tomcat#{node['tomcat']['base_version']}" 
+  base_instance = new_resource.name
 
   # Set defaults for resource attributes from node attributes. We can't do
   # this in the resource declaration because node isn't populated yet when
@@ -15,7 +15,7 @@ action :configure do
     end
   end 
 
-  if new_resource.name == 'base'
+  if new_resource.base_version == true
     instance = base_instance
 
     # If they weren't set explicitly, set these paths to the default
@@ -268,8 +268,4 @@ action :configure do
     command 'sleep 5'
     action :nothing
   end
-end
-
-def baseInstanceForPlatform()
-  return "tomcat#{node['tomcat']['base_version']}"
 end
