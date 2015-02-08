@@ -34,7 +34,7 @@ action :configure do
     [:base, :home, :config_dir, :log_dir, :work_dir, :context_dir,
      :webapp_dir].each do |attr|
       if not new_resource.instance_variable_get("@#{attr}") and node["tomcat"][attr]
-        new = node["tomcat"][attr].sub("tomcat#{node['tomcat']['base_version']}", "#{instance}")
+        new = node["tomcat"][attr].sub("#{base_instance}", "#{instance}")
         new_resource.instance_variable_set("@#{attr}", new)
       end
     end
